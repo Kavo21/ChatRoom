@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2002
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat_Socketio", "Chat_Socketio\Chat_Socketio.csproj", "{41490045-6624-4740-A16D-1BEBC91F9D90}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{41490045-6624-4740-A16D-1BEBC91F9D90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41490045-6624-4740-A16D-1BEBC91F9D90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41490045-6624-4740-A16D-1BEBC91F9D90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41490045-6624-4740-A16D-1BEBC91F9D90}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {25970A72-C682-495C-8040-842A434B2020}
+	EndGlobalSection
+EndGlobal
