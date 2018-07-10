@@ -65,6 +65,7 @@ namespace Chat_Socketio
             }
         }
 
+        //加入房間
         private void Room_Click(object sender, RoutedEventArgs e)
         {
             sokcet_Connect.JoinRoom(Room.Text.ToString());
@@ -85,6 +86,7 @@ namespace Chat_Socketio
             }
         }
 
+        //偵測鍵盤事件
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter) {

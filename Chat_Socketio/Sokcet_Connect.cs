@@ -33,6 +33,7 @@ namespace Chat_Socketio
                 sendDataToClinet.Invoke("連線成功");
             });
 
+            //中斷連接事件
             socket.On("disconnect", (data) =>
             {
                 sendDataToClinet.Invoke(data.ToString());
@@ -68,6 +69,7 @@ namespace Chat_Socketio
           
         }
 
+        //中斷連接方法
         public void SocketDisconnect() {
 
             socket.Disconnect();
