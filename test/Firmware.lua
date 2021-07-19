@@ -1,5 +1,3 @@
-local RedfishHandler = require("redfish-handler")
-
 local CONSTANTS = require("constants")
 
 local CONFIG = require("config")
@@ -9,6 +7,8 @@ local utils = require("utils")
 local turbo = require("turbo")
 
 local _ = require("underscore")
+
+local RedfishHandler = require("redfish-handler")
 
 local FirmwareInventoryHandler = class("FirmwareInventoryHandler", RedfishHandler)
 
