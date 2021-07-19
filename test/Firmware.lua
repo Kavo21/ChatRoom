@@ -1,16 +1,8 @@
-return function()
 	return {
-	    resource_definitions = function()
-		return {
-		}
-	    end,
-	    property_definitions = function()
-		return {
-		}
-	    end,
-	    operations = function()
-		return {
-		}
-	    end,
+	    resource_definitions = {
+	    },
+	    property_definitions = {
+	    },
+	    operations = {
+	    },
 	}
-end
