@@ -1,0 +1,57 @@
+└── update_service_redfish_extension-src
+
+    └── data
+
+        └── app
+
+            └── RTP
+
+                ├── redfish
+
+                │   ├── multipart-handler.lua
+
+                │   ├── multipart-push.lua
+
+                │   ├── property-access
+
+                │   │   └── UpdateService.lua
+
+                │   ├── property-operation
+
+                │   │   └── UpdateService.lua
+
+                │   ├── property-size
+
+                │   │   └── UpdateService.lua
+
+                │   ├── property-type
+
+                │   │   └── UpdateService.lua
+
+                │   ├── resource_metadata
+
+                │   │   ├── FirmwareInventory_Collection.lua
+
+                │   │   ├── FirmwareInventory_Instance.lua
+
+                │   │   └── UpdateService.lua
+
+                │   ├── update-service
+
+                │   │   ├── firmware-inventory.lua
+
+                │   │   ├── software-inventory.lua
+
+                │   │   ├── update-service_config.lua
+
+                │   │   └── update-service_utils.lua
+
+                │   ├── update-service.lua
+
+                │   ├── upload-cabundle.lua
+
+                │   └── upload-file.lua
+
+                └── update-service
+
+                    └── update-service.lua
