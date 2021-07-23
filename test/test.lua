@@ -1,10 +1,25 @@
-    operations = function()
+property_definitions = function()
         return {
-            GET = function(operations_params)
-                local db_access_clients = operations_params.db_access_clients
-                local response_body = operations_params.response_body
-                local response_data = db_access_clients:redis_lua_access()
-                utils.copy_table_endpoint(response_body, response_data, {"Status"})
-            end,
+            endpoint_settings = {
+                ["Description"] = function(property_object)
+                    property_object:set_data_value("redis_lua_access_posthook", {
+                            GET = function(posthook_params)
+                                return "Collection of Firmware Inventory resources available to the UpdateService"
+                            end,
+                        })
+                end,
+                ["Members"] = function(property_object)
+                    property_object:set_data_value("redis_lua_access_prehook", {
+                        GET = function(prehook_params)
+                            yield(prehook_params.pl:keys(string.format("%s*:Name", prehook_params.redis_key_prefix)))
+                        end,
+                    })
+                    property_object:set_data_value("redis_lua_access_posthook", {
+                            GET = function(posthook_params)
+                                return utils.getODataIDArray(posthook_params.pl_replies[1], 1)
+                            end,
+                        })
+                end,
+            }
         }
     end,
