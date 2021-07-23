@@ -1,16 +1,8 @@
-return function()
+    operations = function()
         return {
-            resource_definitions = function()
-                return {
-            }
-           end,
-            property_definitions = function()
-                return {
-            }
-           end,
-           operations = function()
-                return {
-            }
-           end,
+            GET = function(operations_params)end,
+            PATCH = function(operations_params)end,
+            POST = function(operations_params)end,
+            DELETE = function(operations_params)end,
         }
-end
+    end,
