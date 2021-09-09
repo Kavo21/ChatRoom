@@ -1,6 +1,7 @@
 local config = require("config")
 local utils = require("utils")
 local otii_utils = require("otii_utils")
+local env_managers_name = utils.get_env_managers_name()
 
 return {
     resource_definitions = function(definitions_params)
