@@ -1,80 +1,25 @@
 local config = require("config")
-local default_constants = require("default_constants")
+local constants = require("constants")
 local utils = require("utils")
-local redis_lua = require("redis")
-local yield = coroutine.yield
+local RedfishHandler = require("redfish-handler")
+local NtpService = class("NtpService", RedfishHandler)
+local NtpService_resource_handler = require("resource_handler")("NtpService")
 
-return {
-    resource_definitions = function(definitions_params)
-        
-            local settings = function(resource_object)
-                resource_object:set_data_value("redfish_redis_key_prefix", {
-                        string.format("Redfish:%s", "UpdateService")
-                    })
-                resource_object:set_data_value("redfish_resource_uri_pattern", {
-                        string.format("^%s/UpdateService/FirmwareInventory$", config.SERVICE_PREFIX),
-                    })
-                resource_object:set_data_value("redfish_resource_superordinate", "ServiceRoot")
-                resource_object:set_data_value("redfish_resource_subordinate", nil)
-            end
-                
-        return {
-           settings = settings,
-        }
-    end,
-    property_definitions = function(definitions_params)
+function NtpService:get()
+    local response_body = {}
+    local url_segments = self:get_url_segments()
+    local redis_key_prefix = string.format("Redfish:%s", table.concat(url_segments, ":"))
 
-        local endpoint_settings = {
-            ["Name"] = function(property_object)
-                property_object:set_data_value("redis_lua_access_posthook", {
-                    GET = function(posthook_params)
-                        return "Firmware Inventory Collection"
-                    end,
-                })
-            end,
-            ["Members"] = function(property_object)
-                property_object:set_data_value("redis_lua_access_prehook", {
-                    GET = function(prehook_params)
-                        yield(prehook_params.pl:keys(string.format("%s*:Name", prehook_params.redis_key_prefix)))
-                    end,
-                })
-                property_object:set_data_value("redis_lua_access_posthook", {
-                    GET = function(posthook_params)
-                        return utils.getODataIDArray(posthook_params.pl_replies[1], 1)
-                    end,
-                })
-            end,
-            ["Members@odata.count"] = function(property_object)
-                property_object:set_data_value("redis_lua_access_prehook", {
-                    GET = function(prehook_params)
-                        yield(prehook_params.pl:keys(string.format("%s*:Name", prehook_params.redis_key_prefix)))
-                    end,
-                })
-                property_object:set_data_value("redis_lua_access_posthook", {
-                    GET = function(posthook_params)
-                        return #posthook_params.pl_replies[1]
-                    end,
-                })
-            end,
-        }
-        return {
-            endpoint_settings = endpoint_settings,
-        }
-    end,
-    operations = function(definitions_params)
-        local operation = {
-            GET = function(operations_params)
-                local db_access_clients = operations_params.db_access_clients
-                local response_body = operations_params.response_body
-                local response_data = db_access_clients:redis_lua_access()
-                utils.copy_table_endpoint(response_body, response_data, {"Name"})
-                utils.copy_table_endpoint(response_body, response_data, {"Members"})
-                utils.copy_table_endpoint(response_body, response_data, {"Members@odata.count"})
-            end,
-        }
-        
-        return {
-            operation = operation,
-        }
-    end,
-}
+    NtpService_resource_handler:GET({
+        redfish_handler = self,
+        response_body = response_body,
+        url_segments = url_segments,
+        redis_key_prefix = redis_key_prefix,
+    })
+
+    self:set_response(response_body)
+    self:set_type(constants.NTP_SERVICE_TYPE)
+    self:set_context(constants.NTP_SERVICE_CONTEXT)
+    self:set_allow_header("GET, PATCH")
+    self:output()
+end
