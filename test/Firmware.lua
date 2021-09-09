@@ -1,45 +1,77 @@
-function NtpService:patch()
-    local url_segments = self:get_url_segments()
-    local redis_key_prefix = string.format("Redfish:%s", table.concat(url_segments, ":"))
-    self:set_scope(redis_key_prefix)
-    local request_uri = self:get_request().path
-    local request_body = self:get_json()
-    local response_body = {}
-    local extended_info = {}
-    local redis_keys_to_watch = {}
-    local property_modified = {}
+local config = require("config")
+local utils = require("utils")
+local otii_utils = require("otii_utils")
 
-    NtpService_resource_handler:PATCH({
-            redfish_handler = self,
-            request_uri = request_uri,
-            url_segments = url_segments,
-            redis_key_prefix = redis_key_prefix,
-            request_body = request_body,
-            response_body = response_body,
-            extended_info = extended_info,
-            redis_keys_to_watch = redis_keys_to_watch,
-            property_modified = property_modified,
-        })
-
-    --handle status code and response_body
-    if next(extended_info) then
-        if next(property_modified) then
-            self:add_error_body(response_body, 200, unpack(extended_info))
-            self:update_lastmodified(redis_key_prefix, os.time())
-        else
-            response_body = {}
-            self:add_error_body(response_body, 400, unpack(extended_info))
-            self:send_error_body(response_body)
+return {
+    resource_definitions = function(definitions_params)
+        local settings = function(resource_object)
+            resource_object:set_data_value("turboredis_timeout", 15)
+            resource_object:set_data_value("redfish_redis_key_prefix", {
+                    string.format("Redfish:%s:%s:%s", "Managers", env_managers_name, "NtpService"),
+                })
+            resource_object:set_data_value("redfish_resource_uri_pattern", {
+                    string.format("^%s/Managers/([^/]+)/NtpService$", config.SERVICE_PREFIX),
+                })
+            resource_object:set_data_value("redfish_resource_superordinate", {
+                    "ManagersInstance",
+                })
+            resource_object:set_data_value("redfish_resource_subordinate", nil)
         end
-    else
-        response_body = {}
-        self:set_status(204)
-        self:update_lastmodified(redis_key_prefix, os.time())
-    end
 
-    self:set_response(response_body)
-    self:set_type(constants.NTP_SERVICE_TYPE)
-    self:set_context(constants.NTP_SERVICE_CONTEXT)
-    self:set_allow_header("GET, PATCH")
-    self:output()
-end
+        return {
+            settings = settings,
+        }
+    end,
+    property_definitions = function(definitions_params)
+        local endpoint_settings = {
+            ["ServiceEnabled"] = function(property_object)
+                property_object:set_data_value("redis_lua_access_cache_enabled", false)
+                property_object:set_data_value("redis_lua_access_prehook", {
+                    GET = function(prehook_params)
+                        prehook_params.pl:get(string.format("%s:ServiceEnabled", prehook_params.redis_key_prefix))
+                    end,
+                })
+                property_object:set_data_value("redis_lua_access_posthook", {
+                    GET = function(posthook_params)
+                        return otii_utils.toboolean(posthook_params.pl_replies[1])
+                    end,
+                })
+                property_object:set_data_value("readonly", false)
+                property_object:set_data_value("property_type",  {"boolean"})
+                property_object:set_data_value("turboredis_access_prehook", {
+                    PATCH = function(prehook_params)
+                        if prehook_params.request_body_value ~= nil then
+                            prehook_params.pl:set(string.format("PATCH:%s", prehook_params.redis_key_prefix), prehook_params.request_body_value)
+                            table.insert(prehook_params.redis_keys_to_watch, string.format("PATCH_FINISH:%s", prehook_params.redis_key_prefix))
+                        end
+                    end,
+                })
+            end,
+        }
+
+        return {
+            endpoint_settings = endpoint_settings,
+        }
+    end,
+    operation_definitions = function(definitions_params)
+        local operation = {
+            GET = function(operations_params)
+                local response_body = operations_params.response_body
+                local db_access_clients = operations_params.db_access_clients
+                local response_data = db_access_clients:redis_lua_access()
+
+                utils.copy_table_endpoint(response_body, response_data, {"ServiceEnabled"})
+                utils.copy_table_endpoint(response_body, response_data, {"PreferredNtpServer"})
+                utils.copy_table_endpoint(response_body, response_data, {"AlternateNtpServer"})
+            end,
+            PATCH = function(operations_params)
+                local db_access_clients = operations_params.db_access_clients
+                local response_data = db_access_clients:turboredis_access()
+            end,
+        }
+
+        return {
+            operation = operation,
+        }
+    end,
+}
