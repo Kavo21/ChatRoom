@@ -2,7 +2,6 @@ function NtpService:patch()
     local url_segments = self:get_url_segments()
     local redis_key_prefix = string.format("Redfish:%s", table.concat(url_segments, ":"))
     self:set_scope(redis_key_prefix)
-
     local request_uri = self:get_request().path
     local request_body = self:get_json()
     local response_body = {}
@@ -42,6 +41,5 @@ function NtpService:patch()
     self:set_type(constants.NTP_SERVICE_TYPE)
     self:set_context(constants.NTP_SERVICE_CONTEXT)
     self:set_allow_header("GET, PATCH")
-
     self:output()
 end
